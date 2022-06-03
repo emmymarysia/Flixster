@@ -4,9 +4,11 @@ package com.example.flixster;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.media.Image;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
@@ -36,6 +38,7 @@ public class MovieDetailsActivity extends AppCompatActivity {
     TextView tvOverview;
     RatingBar rbVoteAverage;
     ImageView imagePreview;
+    String ytID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +65,10 @@ public class MovieDetailsActivity extends AppCompatActivity {
         float voteAverage = movie.getVoteAverage().floatValue();
         rbVoteAverage.setRating(voteAverage /2.0f);
 
+        Log.i("Movie Details", NOW_PLAYING_URL + movie.getId() + "/videos?api_key=" + getString(R.string.movie_api_key));
+
         AsyncHttpClient client = new AsyncHttpClient();
-        client.get(NOW_PLAYING_URL + String.valueOf(movie.getId()) + "/videos?api_key=" + R.string.movie_api_key, new JsonHttpResponseHandler() {
+        client.get(NOW_PLAYING_URL + movie.getId() + "/videos?api_key=" + getString(R.string.movie_api_key), new JsonHttpResponseHandler() {
             @Override
             public void onSuccess(int statusCode, Headers headers, JSON json) {
                 //Log.d(TAG, "onSuccess");
@@ -72,7 +77,8 @@ public class MovieDetailsActivity extends AppCompatActivity {
                     JSONArray results = jsonObject.getJSONArray("results");
                     //Log.i(TAG, "Results: " + results.toString());
                     if(results.length() > 0) {
-                        Integer ytID = (Integer) results.get(0);
+                        ytID = results.getJSONObject(0).getString("key");
+                        Log.d("id", ytID);
                     }
                     //movieAdapter.notifyDataSetChanged();
                     //Log.i(TAG, "Movies: " + movies.size());
@@ -88,5 +94,21 @@ public class MovieDetailsActivity extends AppCompatActivity {
                 //Log.d(TAG, "onFailure" + statusCode);
             }
         });
+
+        imagePreview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                //create an intent for the new activity
+                Intent intent = new Intent(MovieDetailsActivity.this, MovieTrailerActivity.class);
+                //serialize the movie using parceler, use its short name as a key
+                //intent.putExtra(Movie.class.getSimpleName(), Parcels.wrap(movie));
+                intent.putExtra("video_key", ytID);
+
+                //show the activity
+                startActivity(intent);
+            }
+        });
     }
+
 }

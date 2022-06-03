@@ -17,6 +17,7 @@ import com.google.android.youtube.player.YouTubePlayerView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.parceler.Parcels;
 
 import okhttp3.Headers;
 
@@ -27,7 +28,7 @@ public class MovieTrailerActivity extends YouTubeBaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_movie_trailer);
 
-        final String videoId = "tkodtNFpzBA";
+        String videoId = getIntent().getStringExtra("video_key");//Parcels.unwrap(getIntent().getParcelableExtra("video_key"));;
 
         //resolve the player view from the layout
         YouTubePlayerView playerView = (YouTubePlayerView) findViewById(R.id.player);
