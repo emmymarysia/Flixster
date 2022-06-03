@@ -1,49 +1,53 @@
 package com.example.flixster;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.codepath.asynchttpclient.AsyncHttpClient;
 import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
-import com.example.flixster.adapters.MovieAdapter;
 import com.example.flixster.models.Movie;
+import com.google.android.youtube.player.YouTubeBaseActivity;
+import com.google.android.youtube.player.YouTubeInitializationResult;
+import com.google.android.youtube.player.YouTubePlayer;
+import com.google.android.youtube.player.YouTubePlayerView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import okhttp3.Headers;
 
-public class MainActivity extends AppCompatActivity {
+public class MovieTrailerActivity extends YouTubeBaseActivity {
 
-    public static final String NOW_PLAYING_URL = "https://api.themoviedb.org/3/movie/now_playing?api_key=";
-    public static final String TAG = "MainActivity";
+    public static final String NOW_PLAYING_URL = "https://api.themoviedb.org/3/movie/now_playing?api_key="
 
-    List<Movie> movies;
-
-    //a07e22bc18f5cb106bfe4cc1f83ad8
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        RecyclerView rvMovies = findViewById(R.id.rvMovies);
-        movies = new ArrayList<>();
+        setContentView(R.layout.activity_movie_trailer);
 
-        //create the adapter
-        MovieAdapter movieAdapter = new MovieAdapter(this, movies);
+        final String videoId = "tkodtNFpzBA";
 
-        //set the adapter on the recycler view
-        rvMovies.setAdapter(movieAdapter);
+        //resolve the player view from the layout
+        YouTubePlayerView playerView = (YouTubePlayerView) findViewById(R.id.player);
 
-        //set a layout manager
-        rvMovies.setLayoutManager(new LinearLayoutManager(this));
+        //initialize with API key
+        playerView.initialize(String.valueOf(R.string.youtube_api_key), new YouTubePlayer.OnInitializedListener() {
+            @Override
+            public void onInitializationSuccess(YouTubePlayer.Provider provider, YouTubePlayer youTubePlayer, boolean b) {
+                //do any work here to cue video, play video, etc.
+                youTubePlayer.cueVideo(videoId);
+            }
+
+            @Override
+            public void onInitializationFailure(YouTubePlayer.Provider provider, YouTubeInitializationResult youTubeInitializationResult) {
+                //log the error
+                Log.e("MovieTrailerActivity", "Error initializing YouTube player");
+            }
+        });
 
         AsyncHttpClient client = new AsyncHttpClient();
         client.get(NOW_PLAYING_URL + getString(R.string.movie_api_key), new JsonHttpResponseHandler() {
@@ -69,5 +73,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onFailure" + statusCode);
             }
         });
+
     }
 }
