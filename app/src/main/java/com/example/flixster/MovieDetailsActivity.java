@@ -1,5 +1,7 @@
 package com.example.flixster;
 
+//import static com.example.flixster.MainActivity.TAG;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.media.Image;
@@ -11,11 +13,20 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.codepath.asynchttpclient.AsyncHttpClient;
+import com.codepath.asynchttpclient.callback.JsonHttpResponseHandler;
 import com.example.flixster.models.Movie;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.parceler.Parcels;
 
+import okhttp3.Headers;
+
 public class MovieDetailsActivity extends AppCompatActivity {
+
+    public static final String NOW_PLAYING_URL = "https://api.themoviedb.org/3/movie/";
 
     //the movie to display
     Movie movie;
@@ -50,5 +61,32 @@ public class MovieDetailsActivity extends AppCompatActivity {
         //convert vote average by dividing by 2
         float voteAverage = movie.getVoteAverage().floatValue();
         rbVoteAverage.setRating(voteAverage /2.0f);
+
+        AsyncHttpClient client = new AsyncHttpClient();
+        client.get(NOW_PLAYING_URL + String.valueOf(movie.getId()) + "/videos?api_key=" + R.string.movie_api_key, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Headers headers, JSON json) {
+                //Log.d(TAG, "onSuccess");
+                JSONObject jsonObject = json.jsonObject;
+                try {
+                    JSONArray results = jsonObject.getJSONArray("results");
+                    //Log.i(TAG, "Results: " + results.toString());
+                    if(results.length() > 0) {
+                        Integer ytID = (Integer) results.get(0);
+                    }
+                    //movieAdapter.notifyDataSetChanged();
+                    //Log.i(TAG, "Movies: " + movies.size());
+                }
+                catch (JSONException e) {
+                    //Log.e(TAG, "Hit json exception", e);
+                    e.printStackTrace();
+                }
+            }
+
+            @Override
+            public void onFailure(int statusCode, Headers headers, String response, Throwable throwable) {
+                //Log.d(TAG, "onFailure" + statusCode);
+            }
+        });
     }
 }
